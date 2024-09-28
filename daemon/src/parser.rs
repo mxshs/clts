@@ -10,16 +10,16 @@ pub struct Parser {
     p_map: HashMap<TokenType, BP>
 }
 
-pub struct Group {
-    pub name: String,
-    pub pairs: Vec<Pair>,
-}
-
 pub enum Node {
     Group(Group),
     String(String),
     Pair(Pair),
     Omit
+}
+
+pub struct Group {
+    pub name: String,
+    pub pairs: Vec<Pair>,
 }
 
 pub struct Pair {
@@ -60,7 +60,7 @@ impl Parser {
         self.p_map[&self.current_token.as_ref().unwrap().token_type].0
     }
 
-    pub fn get_rbp(&self) -> u8 {
+    pub fn _get_rbp(&self) -> u8 {
         self.p_map[&self.current_token.as_ref().unwrap().token_type].1
     }
 
@@ -107,10 +107,11 @@ impl Parser {
         }
     }
 
-    pub fn parse_prefix(&self) -> Option<Node> {
-        let tok = self.current_token.as_ref()?;
-        match tok.token_type {
-            TokenType::Value => Some(Node::String(tok.value.clone())),
+    pub fn parse_prefix(&mut self) -> Option<Node> {
+        let Token { value, token_type } = self.current_token.as_mut()?;
+
+        match token_type {
+            TokenType::Value => Some(Node::String(value.to_string())),
             _ => Some(Node::Omit)
         }
     }

@@ -28,7 +28,10 @@ pub(crate) enum TokenType {
 impl Tokenizer {
     pub fn new(filename: &str) -> Tokenizer {
         let mut file = Vec::new();
-        fs::File::open(filename).expect("expected valid filename and read permissions").read_to_end(&mut file).expect("failed to read the provided configuration file");
+        fs::File::open(filename)
+            .expect("expected valid filename and read permissions")
+            .read_to_end(&mut file)
+            .expect("failed to read the provided configuration file");
 
         Tokenizer{
             file,
@@ -91,10 +94,10 @@ impl Tokenizer {
         if self.offset < self.file.len() {
             self.offset += 1;
 
-            Some(self.file[self.offset])
-        } else {
-            None
+            return Some(self.file[self.offset])
         }
+
+        None
     }
 
     fn peek_read(&mut self, chr: u8) -> Option<u8> {
@@ -116,7 +119,8 @@ impl Tokenizer {
             }
         }
 
-        String::from_utf8(self.file[start..self.offset].to_vec()).expect("should not panic")
+        String::from_utf8(self.file[start..self.offset].to_vec())
+            .expect("should be a valid slice")
     }
 
     fn skip(&mut self) {

@@ -8,12 +8,13 @@ use std::{
 };
 
 fn main() {
-    let mut sock = UnixStream::connect("/tmp/clts.sock").expect("socket does not exist, check whether the daemon is running");
+    let mut sock = UnixStream::connect("/tmp/clts.sock")
+        .expect("socket does not exist, check whether the daemon is running");
 
     let args: Vec<String> = std::env::args().collect();
 
     match sock.write_all(args[1..].join(" ").as_bytes()) {
-        Ok(_n) => {
+        Ok(_) => {
             sock.shutdown(std::net::Shutdown::Write).unwrap();
 
             let mut cmd = String::new();

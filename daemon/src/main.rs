@@ -27,7 +27,7 @@ fn main() {
     let r = Runner::new(groups);
 
     let sock = UnixListener::bind("/tmp/clts.sock").
-        expect("socket does not exist, check whether the daemon is running");
+        expect("socket already exists, probably the daemon is running");
 
     loop {
         let mut conn = sock.accept().unwrap();

@@ -23,7 +23,7 @@ impl Runner {
                     runner.add_mapping(&group.name, mapping);
                 }
             } else {
-                panic!("unexpected non-group expression");
+                panic!("unexpected non-group node");
             }
         }
 
@@ -32,6 +32,7 @@ impl Runner {
 
     fn add_mapping(&mut self, group_name: &String, mapping: Pair) {
         self.meta.insert(mapping.from.clone(), group_name.clone());
+
         if self.mapping.get_mut(group_name).is_none() {
             self.mapping.insert(group_name.clone(), HashMap::new());
         }
@@ -60,8 +61,7 @@ impl Runner {
         }
 
         if offset < input.len() {
-            let temp = &input[offset..];
-            res.append(&mut temp.to_vec());
+            res.append(&mut input[offset..].to_vec());
         }
 
         res
