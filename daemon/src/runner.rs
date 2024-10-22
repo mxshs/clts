@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::io::Write;
 
 use super::parser::{
     Node,
@@ -65,6 +66,48 @@ impl Runner {
         }
 
         res
+    }
+
+    pub fn write(&self, path: &str) {
+        let mut f = std::fs::OpenOptions::new().append(true).open(path).unwrap();
+        let mut aliases = Vec::new();
+        let mut expansions = Vec::new();
+
+        for group in &self.mapping {
+            let al = self.convert(Vec::new(), group.0);
+            aliases.extend_from_slice(&al);
+
+            for seq in al {
+                println!("{}", seq.concat());
+                if seq.len() > 0 {
+                    expansions.push(self.map(seq))
+                }
+            }
+        }
+
+        let mut offset = 0;
+        for idx in 0..(aliases.len() - 1) {
+            if !aliases[idx].is_empty() {
+                f.write_all(format!("alias {} {}", aliases[idx].concat(), expansions[offset].concat()).as_bytes()).unwrap();
+                offset += 1;
+            }
+        }
+    }
+
+    fn convert(&self, base: Vec<String>, group_name: &String) -> Vec<Vec<String>> {
+        let mut aliases = Vec::new();
+        aliases.push(base.clone());
+
+        for char in self.mapping[group_name].clone() {
+            if !base.contains(&char.0) {
+                let mut temp = base.clone();
+                temp.push(char.0);
+                let al = self.convert(temp, group_name);
+                aliases.extend(al);
+            }
+        }
+
+        aliases
     }
 }
 

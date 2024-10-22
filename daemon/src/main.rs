@@ -1,4 +1,5 @@
 use std::{
+    path,
     os::unix::net::UnixListener,
     io::{
         Read,
@@ -14,7 +15,30 @@ mod parser;
 mod runner;
 
 fn main() {
-    let tok = Tokenizer::new("test.txt");
+    let mut args = std::env::args();
+
+    let mut path = config();
+    let mut out = None;
+
+    while let Some(arg) = args.next() {
+        match arg.as_str() {
+            "--sock" => {
+                path = Some(args.next().expect("missing socket path after sock flag"));
+            },
+            "--out" => {
+                out = Some(args.next().expect("missing socket path after sock flag"));
+            },
+            _ => {
+                continue;
+            }
+        }
+    }
+
+    run(&path.unwrap(), out)
+}
+
+fn run(path: &str, out: Option<String>) {
+    let tok = Tokenizer::new(path);
 
     let p = Parser::new(tok).parse();
 
@@ -25,6 +49,12 @@ fn main() {
     }
 
     let r = Runner::new(groups);
+
+    if let Some(out) = out {
+        r.write(&out);
+
+        return
+    }
 
     let sock = UnixListener::bind("/tmp/clts.sock").
         expect("socket already exists, probably the daemon is running");
@@ -42,4 +72,19 @@ fn main() {
 
         drop(conn);
     }
+}
+
+fn config() -> Option<String> {
+    if path::Path::new("/etc/clts/clts.conf").exists() {
+        return Some("/etc/clts/clts.conf".to_string())
+    } 
+
+    if let Ok(home) = std::env::var("HOME") {
+        let config = home + "/.config/clts/clts.conf";
+        if path::Path::new(&config).exists() {
+            return Some(config)
+        }
+    }
+
+    None
 }

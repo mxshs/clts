@@ -1,4 +1,0 @@
-[temp]
-asd -> find
-[temp1]
-qwe -> find
